@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocalización con Dirección</title>
+</head>
+<body>
+    <h1>Obtener Ubicación y Dirección</h1>
+    <button id="btn-ubicacion">Obtener mi ubicación</button>
+    <p id="output"></p>
+
+    <script>
+        const boton = document.getElementById("btn-ubicacion");
+        const output = document.getElementById("output");
+
+        boton.addEventListener("click", () => {
+            // Verifica si el navegador soporta la API de Geolocalización
+            if ("geolocation" in navigator) {
+                // Solicita la ubicación
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        
+                        // Muestra las coordenadas en la página
+                        output.innerHTML = `Latitud: ${latitude}, Longitud: ${longitude}`;
+
+                        // Realiza una solicitud a OpenStreetMap para obtener la dirección
+                        obtenerDireccion(latitude, longitude);
+                    },
+                    (error) => {
+                        // Manejo de errores
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                output.textContent = "Permiso denegado por el usuario.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                output.textContent = "Información de ubicación no disponible.";
+                                break;
+                            case error.TIMEOUT:
+                                output.textContent = "La solicitud de ubicación tardó demasiado.";
+                                break;
+                            default:
+                                output.textContent = "Ocurrió un error desconocido.";
+                        }
+                    }
+                );
+            } else {
+                output.textContent = "La geolocalización no está soportada en este navegador.";
+            }
+        });
+
+        function obtenerDireccion(lat, lon) {
+            const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.address) {
+                        const direccion = data.address;
+                        output.innerHTML += `<br><strong>Dirección:</strong><br>`;
+
+                        if (direccion.road) {
+                            output.innerHTML += `Calle: ${direccion.road}<br>`;
+                        }
+                        if (direccion.city) {
+                            output.innerHTML += `Ciudad: ${direccion.city}<br>`;
+                        }
+                        if (direccion.state) {
+                            output.innerHTML += `Estado/Provincia: ${direccion.state}<br>`;
+                        }
+                        if (direccion.country) {
+                            output.innerHTML += `País: ${direccion.country}<br>`;
+                        }
+                    } else {
+                        output.innerHTML += "<br>No se pudo obtener la dirección.";
+                    }
+                })
+                .catch(error => {
+                    output.innerHTML += "<br>Error al obtener la dirección.";
+                });
+        }
+    </script>
+</body>
+</html>
