@@ -58,20 +58,32 @@
                 .then(data => {
                     if (data && data.address) {
                         const direccion = data.address;
-                        output.innerHTML += `<br><strong>Dirección:</strong><br>`;
+                        let direccionFinal = "";
 
-                        if (direccion.road) {
-                            output.innerHTML += `Calle: ${direccion.road}<br>`;
+                        // Construye la dirección en el formato solicitado
+                        if (direccion.road && direccion.crossroad) {
+                            direccionFinal = `Entre ${direccion.road} y ${direccion.crossroad}`;
+                        } else if (direccion.road) {
+                            direccionFinal = `Calle ${direccion.road}`;
                         }
+
                         if (direccion.city) {
-                            output.innerHTML += `Ciudad: ${direccion.city}<br>`;
+                            direccionFinal += `, Ciudad de ${direccion.city}`;
+                        } else if (direccion.town) {
+                            direccionFinal += `, Ciudad de ${direccion.town}`;
+                        } else if (direccion.village) {
+                            direccionFinal += `, Pueblo de ${direccion.village}`;
                         }
+
                         if (direccion.state) {
-                            output.innerHTML += `Estado/Provincia: ${direccion.state}<br>`;
+                            direccionFinal += `, ${direccion.state}`;
                         }
+
                         if (direccion.country) {
-                            output.innerHTML += `País: ${direccion.country}<br>`;
+                            direccionFinal += `, ${direccion.country}`;
                         }
+
+                        output.innerHTML += `<br><strong>Dirección:</strong><br>${direccionFinal}`;
                     } else {
                         output.innerHTML += "<br>No se pudo obtener la dirección.";
                     }
